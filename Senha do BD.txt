@@ -1,2 +1,0 @@
-login: SYSDBA
-senha: masterkey
