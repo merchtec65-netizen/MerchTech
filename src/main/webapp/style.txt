@@ -1,0 +1,80 @@
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+    	height: 200vh;
+    	background: linear-gradient(
+    	to bottom right,
+    	 #273c75,
+    	 #40739e,
+    	 #6495ED,
+    	 #40739e,
+    	 #273c75), url("IMAGEM/mercado.webp");
+    	padding-bottom: 50px; /* espaço extra no fim da página */
+    	background-size: cover;           /* cobre toda a tela */
+    	background-position: center;      /* centraliza a imagem */
+    	background-repeat: no-repeat;
+    }
+
+    .icone_acesso {
+        position: relative; /* você ajusta depois */
+        top: 180px;
+        width: 150px;
+        height: 150px;
+    }
+
+    h1 {
+        color: rgb(192, 192, 192);
+        margin-bottom: 20px;
+    }
+
+    .login-box {
+        background: #2f3640;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        width: 300px;
+        text-align: center;
+        
+    }
+
+    .login-box input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid #dcdde1;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .login-box a {
+        display: inline-block;
+        margin-top: 15px;
+        padding: 12px;
+        width: 100%;
+        background: #6495ED;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+    .login-box a:hover {
+        background: #192a56;
+    }
+    
+    .login-box input:focus {
+	    border-color: #273c75;
+	    box-shadow: 0 0 6px rgba(39, 60, 117, 0.5);
+	    outline: none;
+    }
+    
+    #user, #pass, #acess {
+    	position: relative;
+    	right: 10px;
+    }
+	
+	

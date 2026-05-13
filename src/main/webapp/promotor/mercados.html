@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MerchTech — Mercados</title>
+
+<link rel="icon" href="../IMAGEM/ICONENOVO.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+  --navy:#1a2540;
+  --blue:#3b6fd4;
+  --blue2:#5285e8;
+  --border:rgba(255,255,255,0.09);
+  --card:rgba(255,255,255,0.04);
+  --muted:#8892aa;
+  --silver:#c8cfe0;
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--navy);
+  color:#e8ecf4;
+}
+
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 90%, rgba(59,111,212,0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(82,133,232,0.14), transparent 55%);
+  z-index:0;
+}
+
+.layout{
+  display:flex;
+  height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+.sidebar{
+  width:220px;
+  background:rgba(15,20,38,0.85);
+  border-right:1px solid var(--border);
+  padding:24px 0;
+  display:flex;
+  flex-direction:column;
+}
+
+.sidebar-brand{
+  display:flex;
+  gap:10px;
+  padding:0 20px 24px;
+  border-bottom:1px solid var(--border);
+}
+
+.brand-name{
+  font-family:'Syne';
+  font-weight:800;
+  font-size:15px;
+}
+
+.brand-role{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.nav-item{
+  padding:10px 12px;
+  margin:6px 12px;
+  color:var(--muted);
+  border-radius:10px;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.nav-item:hover{
+  background:var(--card);
+  color:var(--silver);
+}
+
+.main{
+  flex:1;
+  padding:32px;
+  overflow:auto;
+}
+
+.page-title{
+  font-family:'Syne';
+  font-size:26px;
+  font-weight:800;
+}
+
+.page-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.grid{
+  margin-top:24px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:16px;
+}
+
+.card{
+  display:flex;
+  gap:14px;
+  padding:14px;
+  border:1px solid var(--border);
+  background:var(--card);
+  border-radius:14px;
+  transition:.2s;
+}
+
+.card:hover{
+  border-color:rgba(82,133,232,0.4);
+  transform:translateY(-2px);
+}
+
+.card img{
+  width:90px;
+  height:90px;
+  border-radius:12px;
+  object-fit:cover;
+  background:#1f2a44;
+}
+
+.info h3{
+  font-size:14px;
+  font-weight:600;
+  color:var(--silver);
+}
+
+.info p{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+      <div>
+        <div class="brand-name">MerchTech</div>
+        <div class="brand-role">Promotor</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="window.location.href='promotor.html'">
+      Painel
+    </div>
+
+    <div class="nav-item" onclick="window.location.href='mercados.html'">
+      Mercados
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <div>
+      <div class="page-title">Mercados</div>
+      <div class="page-sub">Pontos de venda disponíveis</div>
+    </div>
+
+    <div class="grid" id="grid">
+      <div style="color:var(--muted)">Carregando...</div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+
+async function carregar(){
+  try{
+
+    const resp = await fetch('../mercados');
+    const lista = await resp.json();
+
+    const ativos = lista.filter(m => m.ativo !== false);
+
+    const grid = document.getElementById('grid');
+
+    if(!ativos.length){
+      grid.innerHTML = `
+        <div style="color:var(--muted)">
+          Nenhum mercado cadastrado.
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = ativos.map(m => `
+      <div class="card">
+
+        <img src="../IMAGEM/placeholder.png">
+
+        <div class="info">
+          <h3>${m.nome}</h3>
+          <p>${m.endereco || ''}</p>
+          <p>${m.cidade || ''} - ${m.bairro || ''}</p>
+        </div>
+
+      </div>
+    `).join('');
+
+  }catch(e){
+    document.getElementById('grid').innerHTML =
+      "<div style='color:var(--muted)'>Erro ao carregar mercados</div>";
+  }
+}
+
+carregar();
+
+</script>
+
+</body>
+</html>

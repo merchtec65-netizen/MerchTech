@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Tela de acesso</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="IMAGEM/ICONENOVO.png">
+</head>
+<body>
+    <img src="IMAGEM/ICONENOVO.png" alt="icone de acesso" class="icone_acesso">
+    <h1>Tela de acesso</h1>
+    <br><br>
+    <div class="login-box">
+        <input id="user" type="text" placeholder="Usuário">
+        <input id="pass" type="password" placeholder="Senha">
+        <a id="acess" href="#">Acessar</a>
+    </div>
+
+    <script>
+        // Pega o link "Acessar"
+        const acessLink = document.getElementById('acess');
+
+        acessLink.addEventListener('click', function(e) {
+            e.preventDefault(); // evita que o link faça navegação padrão
+            const usuario = document.getElementById('user').value;
+            localStorage.setItem('usuario', usuario); // salva o login
+            window.location.href = 'promotor/promotor.html';   // redireciona
+        });
+    </script>
+</body>
+</html>
