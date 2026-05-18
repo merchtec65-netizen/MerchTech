@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercados — MerchTech</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body{
+    font-family:'DM Sans',sans-serif;
+    background:#1a2540;
+    color:white;
+    padding:40px;
+  }
+
+  h1{
+    font-family:'Syne',sans-serif;
+    margin-bottom:30px;
+  }
+
+  .top-actions{
+    display:flex;
+    gap:15px;
+    margin-bottom:30px;
+  }
+
+  .btn{
+    border:none;
+    padding:14px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    color:white;
+  }
+
+  .btn-add{
+    background:linear-gradient(135deg,#5285e8,#3b6fd4);
+  }
+
+  .btn-remove{
+    background:#d9534f;
+  }
+
+  .card{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    display:flex;
+    gap:20px;
+    align-items:center;
+  }
+
+  .card img{
+    width:120px;
+    height:120px;
+    object-fit:cover;
+    border-radius:12px;
+  }
+
+  .market-info{
+    flex:1;
+  }
+
+  .market-info h2{
+    margin-bottom:8px;
+  }
+
+  .market-info p{
+    color:#b8c1d9;
+    margin-bottom:4px;
+  }
+
+  .remove-btn{
+    background:#e05555;
+    border:none;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+  }
+
+  .modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .modal.open{
+    display:flex;
+  }
+
+  .modal-content{
+    background:#1f2d4d;
+    width:450px;
+    padding:30px;
+    border-radius:18px;
+  }
+
+  .modal-content h2{
+    margin-bottom:20px;
+  }
+
+  .form-group{
+    margin-bottom:15px;
+  }
+
+  input{
+    width:100%;
+    height:45px;
+    border:none;
+    border-radius:10px;
+    padding:0 14px;
+    background:rgba(255,255,255,0.08);
+    color:white;
+  }
+
+  input[type="file"]{
+    padding:10px;
+  }
+
+  .save-btn{
+    width:100%;
+    height:45px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,#5285e8,#3b6fd4);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:10px;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>Gerenciamento de Mercados</h1>
+
+<div class="top-actions">
+  <button class="btn btn-add" onclick="abrirModal()">
+    + Novo Mercado
+  </button>
+
+  <button class="btn btn-remove" onclick="carregarMercados()">
+    Atualizar Lista
+  </button>
+</div>
+
+<div id="listaMercados"></div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+
+    <h2>Novo Mercado</h2>
+
+    <div class="form-group">
+      <input type="text" id="nome" placeholder="Nome do mercado">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="cidade" placeholder="Cidade">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="bairro" placeholder="Bairro">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="rua" placeholder="Rua">
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="numero" placeholder="Número">
+    </div>
+
+    <div class="form-group">
+      <input type="file" id="foto">
+    </div>
+
+    <button class="save-btn" onclick="cadastrarMercado()">
+      Salvar Mercado
+    </button>
+
+  </div>
+</div>
+
+<script>
+event.stopPropagation();
+
+function abrirModal(){
+  document.getElementById('modal').classList.add('open');
+}
+
+function fecharModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+async function carregarMercados(){
+
+  const container = document.getElementById('listaMercados');
+
+  try{
+
+    const resp = await fetch('/MerchTech/mercados');
+    const lista = await resp.json();
+
+    if(lista.length === 0){
+      container.innerHTML = '<p>Nenhum mercado cadastrado.</p>';
+      return;
+    }
+
+    container.innerHTML = lista.map(m => `
+
+    <div class="card" onclick="abrirMercado(${m.id})" style="cursor:pointer;">
+
+        <img src="/MerchTech/uploads/${m.foto || 'semfoto.png'}">
+
+        <div class="market-info">
+          <h2>${m.nome}</h2>
+          <p>${m.cidade}</p>
+          <p>${m.bairro}</p>
+          <p>${m.rua}, ${m.numero}</p>
+        </div>
+
+        <button class="remove-btn"
+            onclick="removerMercado(event, ${m.id})">
+            Remover
+        </button>
+
+      </div>
+
+    `).join('');
+
+  }catch(e){
+    container.innerHTML = '<p>Erro ao carregar mercados.</p>';
+  }
+}
+
+async function cadastrarMercado(){
+
+  const formData = new FormData();
+
+  formData.append('nome', document.getElementById('nome').value);
+  formData.append('cidade', document.getElementById('cidade').value);
+  formData.append('bairro', document.getElementById('bairro').value);
+  formData.append('rua', document.getElementById('rua').value);
+  formData.append('numero', document.getElementById('numero').value);
+
+  const foto = document.getElementById('foto').files[0];
+
+  if(foto){
+    formData.append('foto', foto);
+  }
+
+  try{
+
+    const resp = await fetch('/MerchTech/mercados', {
+      method:'POST',
+      body:formData
+    });
+
+    if(!resp.ok){
+      throw new Error();
+    }
+
+    fecharModal();
+    carregarMercados();
+
+  }catch(e){
+    alert('Erro ao cadastrar mercado');
+  }
+}
+
+async function removerMercado(event, id){
+
+	  event.stopPropagation(); // 🔥 impede abrirMercado()
+
+	  if(!confirm('Deseja remover este mercado?')){
+	    return;
+	  }
+
+	  try{
+
+	    const resp = await fetch('/MerchTech/mercados?id=' + id, {
+	      method:'DELETE'
+	    });
+
+	    if(!resp.ok){
+	      throw new Error();
+	    }
+
+	    carregarMercados();
+
+	  }catch(e){
+	    alert('Erro ao remover mercado');
+	  }
+}
+
+carregarMercados();
+
+function abrirMercado(id){
+	  window.location.href = `mercado-detalhes.html?id=${id}`;
+	}
+</script>
+
+</body>
+</html>

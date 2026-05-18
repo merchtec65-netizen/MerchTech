@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MerchTech — Mercados</title>
 
-<link rel="icon" href="../IMAGEM/ICONENOVO.png">
+<link rel="icon" href="../foto/ICONENOVO.png">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
@@ -145,6 +145,42 @@ body::before{
   color:var(--muted);
   margin-top:4px;
 }
+
+/* Scroll moderno */
+
+.main::-webkit-scrollbar{
+  width:10px;
+}
+
+.main::-webkit-scrollbar-track{
+  background:rgba(255,255,255,0.03);
+  border-radius:20px;
+}
+
+.main::-webkit-scrollbar-thumb{
+  background:linear-gradient(
+    180deg,
+    rgba(82,133,232,0.85),
+    rgba(59,111,212,0.85)
+  );
+
+  border-radius:20px;
+
+  border:2px solid rgba(15,20,38,0.9);
+}
+
+.main::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(
+    180deg,
+    rgba(102,153,255,1),
+    rgba(82,133,232,1)
+  );
+}
+
+.main{
+  scrollbar-width:thin;
+  scrollbar-color:#5285e8 rgba(255,255,255,0.03);
+}
 </style>
 </head>
 
@@ -175,7 +211,7 @@ body::before{
 
     <div>
       <div class="page-title">Mercados</div>
-      <div class="page-sub">Pontos de venda disponíveis</div>
+      <div class="page-sub">Pontos de Entregas</div>
     </div>
 
     <div class="grid" id="grid">
@@ -207,9 +243,11 @@ async function carregar(){
     }
 
     grid.innerHTML = ativos.map(m => `
-      <div class="card">
+    <div class="card"
+    onclick="abrirMercado(${m.id})"
+    style="cursor:pointer;">
 
-        <img src="../IMAGEM/placeholder.png">
+    <img src="/MerchTech/uploads/${m.foto}">
 
         <div class="info">
           <h3>${m.nome}</h3>
@@ -228,6 +266,10 @@ async function carregar(){
 
 carregar();
 
+function abrirMercado(id){
+	  window.location.href =
+	    `mercado-detalhes.html?id=${id}`;
+	}
 </script>
 
 </body>
