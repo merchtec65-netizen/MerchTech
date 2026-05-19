@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MerchTech — Detalhes do Mercado</title>
+<link rel="icon" href="../foto/ICONENOVO.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy:   #1a2540;
+  --blue:   #3b6fd4;
+  --blue2:  #5285e8;
+  --border: rgba(255,255,255,0.09);
+  --card:   rgba(255,255,255,0.04);
+  --muted:  #8892aa;
+  --silver: #c8cfe0;
+  --success: #34c47c;
+  --error:   #e05555;
+}
+
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--navy); color: #e8ecf4; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 90%, rgba(59,111,212,0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 10%, rgba(82,133,232,0.14), transparent 55%);
+  z-index: 0;
+}
+
+.layout { display: flex; height: 100vh; position: relative; z-index: 1; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px; background: rgba(15,20,38,0.85);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 24px 0;
+  flex-shrink: 0; backdrop-filter: blur(8px);
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+.brand-dot {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue2), var(--blue));
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.brand-dot svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.brand-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff; }
+.brand-role { font-size: 11px; color: var(--muted); }
+
+.nav-section { padding: 0 12px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
+  color: var(--muted); transition: background 0.15s, color 0.15s;
+  border: none; background: transparent; width: 100%; text-align: left; margin-bottom: 2px;
+}
+.nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.nav-item:hover { background: var(--card); color: var(--silver); }
+.nav-item.active { background: rgba(82,133,232,0.15); color: var(--blue2); }
+
+.sidebar-spacer { flex: 1; }
+.sidebar-user {
+  padding: 16px 20px 0; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue2), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 500; color: var(--silver); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 11px; color: var(--muted); }
+.btn-logout { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; display: flex; align-items: center; transition: color 0.15s; }
+.btn-logout:hover { color: var(--error); }
+.btn-logout svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Main ── */
+.main {
+  flex: 1; overflow-y: auto; padding: 32px 36px;
+  display: flex; flex-direction: column; gap: 24px;
+  scrollbar-width: thin; scrollbar-color: rgba(82,133,232,0.5) transparent;
+}
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-thumb { background: rgba(82,133,232,0.4); border-radius: 20px; }
+
+/* ── Header do mercado ── */
+.mercado-header {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.mercado-header-info { flex: 1; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--muted); cursor: pointer;
+  background: none; border: none; margin-bottom: 10px;
+  transition: color 0.15s; padding: 0;
+}
+.back-btn:hover { color: var(--blue2); }
+.back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mercado-nome-header { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.mercado-end-header { font-size: 13px; color: var(--muted); }
+
+/* Badge somente leitura */
+.badge-readonly {
+  display: flex; align-items: center; gap: 8px;
+  height: 42px; padding: 0 20px; border-radius: 12px;
+  background: rgba(136,146,170,0.1); border: 1px solid var(--border);
+  color: var(--muted); font-size: 13px; font-weight: 500;
+  flex-shrink: 0;
+}
+.badge-readonly svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* ── Galeria ── */
+.section-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.section-head {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.section-title { font-size: 14px; font-weight: 600; color: var(--silver); }
+.section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.count-badge {
+  font-size: 11px; color: var(--blue2);
+  background: rgba(82,133,232,0.12);
+  border: 1px solid rgba(82,133,232,0.2);
+  border-radius: 6px; padding: 3px 10px; font-weight: 600;
+}
+
+.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; padding: 20px 24px; }
+
+.foto-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  animation: fadeUp 0.4s ease both;
+  cursor: pointer;
+}
+.foto-card:hover { border-color: rgba(82,133,232,0.35); transform: translateY(-2px); }
+
+.foto-card img { width: 100%; height: 180px; object-fit: cover; display: block; background: rgba(82,133,232,0.06); }
+
+.foto-info { padding: 14px 16px; }
+.foto-produto { font-size: 14px; font-weight: 600; color: var(--silver); margin-bottom: 3px; }
+.foto-empresa { font-size: 12px; color: var(--blue2); margin-bottom: 8px; font-weight: 500; }
+.foto-meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); margin-top: 3px; }
+.foto-meta svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+
+.empty-state { padding: 48px 24px; text-align: center; font-size: 13px; color: var(--muted); grid-column: 1/-1; }
+.empty-state svg { width: 36px; height: 36px; stroke: var(--muted); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; display: block; margin: 0 auto 12px; opacity: 0.4; }
+
+/* ── Lightbox ── */
+.lightbox {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.lightbox.open { display: flex; }
+
+.lightbox-inner {
+  position: relative;
+  max-width: 90vw; max-height: 90vh;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  animation: popIn 0.2s ease both;
+}
+
+.lightbox-inner img {
+  max-width: 100%; max-height: 75vh;
+  border-radius: 14px;
+  object-fit: contain;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.lightbox-meta {
+  background: rgba(30,42,69,0.95); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 20px;
+  display: flex; gap: 24px; align-items: center;
+  width: 100%;
+}
+.lightbox-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.lightbox-meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+.lightbox-meta-value { font-size: 13px; color: var(--silver); font-weight: 500; }
+
+.lightbox-close {
+  position: absolute; top: -14px; right: -14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(30,42,69,0.95); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted); transition: color 0.15s;
+}
+.lightbox-close:hover { color: var(--error); }
+.lightbox-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+@keyframes fadeUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn   { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-dot">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">MerchTech</div>
+        <div class="brand-role">Supervisor</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <button class="nav-item" onclick="window.location.href='supervisor.html'">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Painel
+      </button>
+      <button class="nav-item active" onclick="window.location.href='mercados.html'">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Mercados
+      </button>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-user">
+      <div class="avatar" id="avatar-initials">SV</div>
+      <div style="flex:1;min-width:0">
+        <div class="user-name" id="user-display">Supervisor</div>
+        <div class="user-role">Supervisor</div>
+      </div>
+      <button class="btn-logout" onclick="sair()" title="Sair">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- Header do mercado -->
+    <div class="mercado-header">
+      <div class="mercado-header-info">
+        <button class="back-btn" onclick="window.location.href='mercados.html'">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar para mercados
+        </button>
+        <div class="mercado-nome-header" id="mercado-nome">Carregando...</div>
+        <div class="mercado-end-header" id="mercado-info"></div>
+      </div>
+      <!-- Somente leitura: sem botão de registrar -->
+      <div class="badge-readonly">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Somente visualização
+      </div>
+    </div>
+
+    <!-- Galeria de registros -->
+    <div class="section-card">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Registros do dia</div>
+          <div class="section-sub">Fotos enviadas pelos promotores</div>
+        </div>
+        <span class="count-badge" id="count-badge">—</span>
+      </div>
+      <div class="galeria" id="galeria">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Carregando registros...
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Lightbox de visualização -->
+<div class="lightbox" id="lightbox" onclick="fecharLightbox(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="fecharLightboxBtn()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-meta">
+      <div class="lightbox-meta-item">
+        <span class="lightbox-meta-label">Produto</span>
+        <span class="lightbox-meta-value" id="lb-produto">—</span>
+      </div>
+      <div class="lightbox-meta-item">
+        <span class="lightbox-meta-label">Empresa</span>
+        <span class="lightbox-meta-value" id="lb-empresa">—</span>
+      </div>
+      <div class="lightbox-meta-item">
+        <span class="lightbox-meta-label">Promotor</span>
+        <span class="lightbox-meta-value" id="lb-promotor">—</span>
+      </div>
+      <div class="lightbox-meta-item">
+        <span class="lightbox-meta-label">Data</span>
+        <span class="lightbox-meta-value" id="lb-data">—</span>
+      </div>
+      <div class="lightbox-meta-item">
+        <span class="lightbox-meta-label">Hora</span>
+        <span class="lightbox-meta-value" id="lb-hora">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const usuarioStr = sessionStorage.getItem('usuario');
+  if (!usuarioStr) { window.location.href = '../index.html'; }
+
+  const usuario = JSON.parse(usuarioStr || '{}');
+  document.getElementById('user-display').textContent = usuario.nome || 'Supervisor';
+  const iniciais = (usuario.nome || 'SV').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('avatar-initials').textContent = iniciais;
+
+  const params    = new URLSearchParams(window.location.search);
+  const mercadoId = params.get('id');
+  if (!mercadoId) window.location.href = 'mercados.html';
+
+  // Carregar dados do mercado
+  async function carregarMercado() {
+    try {
+      const resp  = await fetch('/MerchTech/mercados');
+      const lista = await resp.json();
+      const m     = lista.find(x => x.id == mercadoId);
+      if (!m) return;
+      document.getElementById('mercado-nome').textContent = m.nome;
+      document.getElementById('mercado-info').textContent =
+        [m.rua, m.numero, m.bairro, m.cidade].filter(Boolean).join(' · ');
+      document.title = `MerchTech — ${m.nome}`;
+    } catch(e) {}
+  }
+
+  // Carregar registros
+  async function carregarRegistros() {
+    const galeria = document.getElementById('galeria');
+    const badge   = document.getElementById('count-badge');
+    try {
+      const resp  = await fetch(`/MerchTech/registros?mercado=${mercadoId}`);
+      const lista = await resp.json();
+
+      badge.textContent = `${lista.length} registro${lista.length !== 1 ? 's' : ''}`;
+
+      if (!lista.length) {
+        galeria.innerHTML = `<div class="empty-state">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Nenhum registro enviado pelos promotores ainda.
+        </div>`;
+        return;
+      }
+
+      galeria.innerHTML = lista.map((r, i) => `
+        <div class="foto-card" style="animation-delay:${i * 0.05}s"
+             onclick="abrirLightbox('${r.foto}', '${escapeHtml(r.produto)}', '${escapeHtml(r.empresa)}', '${escapeHtml(r.nomeUsuario || '')}', '${r.criado_em || ''}', '${r.hora || ''}')">
+          <img src="/MerchTech/uploads/${r.foto}" alt="${escapeHtml(r.produto)}"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1 1\'></svg>'">
+          <div class="foto-info">
+            <div class="foto-produto">${r.produto}</div>
+            <div class="foto-empresa">${r.empresa}</div>
+            <div class="foto-meta">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              ${r.nomeUsuario || ''}
+            </div>
+            <div class="foto-meta">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              ${r.criado_em ? new Date(r.criado_em).toLocaleDateString('pt-BR') : ''}
+            </div>
+            <div class="foto-meta">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${r.hora ? r.hora.slice(0, 5) : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+    } catch(e) {
+      galeria.innerHTML = `<div class="empty-state">Erro ao carregar registros.</div>`;
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  // Lightbox
+  function abrirLightbox(foto, produto, empresa, promotor, criado_em, hora) {
+    document.getElementById('lightbox-img').src  = `/MerchTech/uploads/${foto}`;
+    document.getElementById('lb-produto').textContent  = produto || '—';
+    document.getElementById('lb-empresa').textContent  = empresa || '—';
+    document.getElementById('lb-promotor').textContent = promotor || '—';
+    document.getElementById('lb-data').textContent     = criado_em ? new Date(criado_em).toLocaleDateString('pt-BR') : '—';
+    document.getElementById('lb-hora').textContent     = hora ? hora.slice(0, 5) : '—';
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function fecharLightbox(e) {
+    if (e.target === document.getElementById('lightbox')) {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+  }
+  function fecharLightboxBtn() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+
+  function sair() {
+    sessionStorage.removeItem('usuario');
+    window.location.href = '../index.html';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+  });
+
+  carregarMercado();
+  carregarRegistros();
+</script>
+</body>
+</html>
