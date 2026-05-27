@@ -120,4 +120,3 @@ org.firebirdsql.jdbc.FBDriver
 - Projeto sem Spring Boot
 - Arquitetura baseada em Servlets + DAO
 - Comunicação via JSON
-```
