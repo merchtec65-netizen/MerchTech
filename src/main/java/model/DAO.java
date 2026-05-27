@@ -10,11 +10,11 @@ import java.util.List;
 public class DAO {
 
     private static final String URL =
-        "jdbc:firebirdsql://localhost:3050/C:/Users/mps12/Documents/Projeto/MerchTech/Database/MEUBANCO.FDB?encoding=UTF8&sessionTimeZone=America/Cuiaba";
+        "jdbc:firebirdsql://LOCALHOST:3050/C:/Database/MEUBANCO.FDB?encoding=UTF8&sessionTimeZone=America/Cuiaba";
 
     private static final String DRIVER = "org.firebirdsql.jdbc.FBDriver";
     private static final String USER = "SYSDBA";
-    private static final String PASSWORD = "masterkey";
+    private static final String PASSWORD = "@CHx2021$";
 
     // ─────────────────────────────────────────────
     // CONEXÃO
