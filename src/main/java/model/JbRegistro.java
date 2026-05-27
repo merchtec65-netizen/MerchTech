@@ -86,11 +86,13 @@ public class JbRegistro {
         this.nomeUsuario = nomeUsuario;
     }
 
-    public Date getCriado_em() {
-        return criado_em;
+    private String criado_emStr;
+
+    public String getCriado_emStr() {
+        return criado_emStr;
     }
 
-    public void setCriado_em(Date criado_em) {
-        this.criado_em = criado_em;
+    public void setCriado_emStr(String criado_emStr) {
+        this.criado_emStr = criado_emStr;
     }
 }

@@ -293,7 +293,8 @@ public boolean removerMercado(int id) {
                     reg.setProduto(rs.getString("produto"));
                     reg.setFoto(rs.getString("foto"));
                     reg.setHora(rs.getTime("hora") != null ? rs.getTime("hora").toString() : "");
-                    reg.setCriado_em(rs.getDate("criado_em"));
+                    java.sql.Date d = rs.getDate("criado_em");
+                    reg.setCriado_emStr(d != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(d) : "");
                     reg.setNomeUsuario(rs.getString("nome_usuario"));
                     lista.add(reg);
                 }
