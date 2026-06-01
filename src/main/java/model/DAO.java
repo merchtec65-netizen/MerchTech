@@ -4,18 +4,18 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Time;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DAO {
 
     private static final String URL =
-        "jdbc:firebirdsql://localhost:3050/C:/Users/mps12/Documents/Projeto/MerchTech/Database/MEUBANCO.FDB?encoding=UTF8&sessionTimeZone=America/Cuiaba";
+        "jdbc:firebirdsql://127.0.0.1:3050/C:/Database/MEUBANCO.FDB";
 
     private static final String DRIVER   = "org.firebirdsql.jdbc.FBDriver";
     private static final String USER     = "SYSDBA";
-    private static final String PASSWORD = "masterkey";
+    private static final String PASSWORD = "@CHx2021$";
 
     // ─────────────────────────────────────────────
     // CONEXÃO

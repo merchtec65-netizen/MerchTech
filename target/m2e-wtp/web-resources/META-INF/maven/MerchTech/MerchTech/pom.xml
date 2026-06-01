@@ -10,8 +10,9 @@
     <packaging>war</packaging>
 
     <build>
+    	<finalName>MerchTech</finalName>
         <plugins>
-
+			
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
@@ -42,6 +43,13 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+        
+        <dependency>
+		    <groupId>org.firebirdsql.jdbc</groupId>
+		    <artifactId>jaybird</artifactId>
+		    <version>6.0.5</version>
+		    <scope>compile</scope>
+		</dependency>
 
     </dependencies>
 
