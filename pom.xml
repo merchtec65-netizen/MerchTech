@@ -8,11 +8,10 @@
     <artifactId>MerchTech</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-
+		
     <build>
-    	<finalName>MerchTech</finalName>
+        <finalName>MerchTech</finalName>
         <plugins>
-			
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
@@ -25,18 +24,10 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.2.3</version>
             </plugin>
-
         </plugins>
     </build>
 
     <dependencies>
-
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -45,11 +36,11 @@
         </dependency>
         
         <dependency>
-		    <groupId>org.firebirdsql.jdbc</groupId>
-		    <artifactId>jaybird</artifactId>
-		    <version>6.0.5</version>
-		    <scope>compile</scope>
-		</dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird</artifactId>
+            <version>6.0.5</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 
