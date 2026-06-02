@@ -95,4 +95,12 @@ public class JbRegistro {
     public void setCriado_emStr(String criado_emStr) {
         this.criado_emStr = criado_emStr;
     }
+    
+    public Date getCriado_em() {
+        return criado_em;
+    }
+
+    public void setCriado_em(Date criado_em) {
+        this.criado_em = criado_em;
+    }
 }

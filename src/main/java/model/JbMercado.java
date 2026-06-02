@@ -95,10 +95,10 @@ public class JbMercado {
         return foto;
     }
 
-    public void setFoto(String Foto) {
-        this.foto = Foto;
+    public void setFoto(String foto) {  // f minúsculo
+        this.foto = foto;
     }
-
+    
     public boolean isAtivo() {
         return ativo;
     }
