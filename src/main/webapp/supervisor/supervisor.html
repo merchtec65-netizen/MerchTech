@@ -356,7 +356,7 @@
     <!-- Header -->
     <div class="page-header">
       <div>
-        <div class="page-title">Promotores</div>
+        <div class="page-title" id="saudacao-titulo">Olá, Supervisor</div>
         <div class="page-sub">Gerencie os promotores de vendas da equipe</div>
       </div>
       <button class="btn-add" onclick="abrirModal()">
@@ -373,14 +373,14 @@
         <div class="stat-desc">cadastrados no sistema</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Ativos</div>
+        <div class="stat-label">Online</div>
         <div class="stat-value" id="stat-ativos">—</div>
-        <div class="stat-desc">em atividade</div>
+        <div class="stat-desc">conectados agora</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Inativos</div>
+        <div class="stat-label">Offline</div>
         <div class="stat-value" id="stat-inativos">—</div>
-        <div class="stat-desc">sem acesso ao sistema</div>
+        <div class="stat-desc">sem atividade recente</div>
       </div>
     </div>
 
@@ -399,7 +399,7 @@
               <th>Nome</th>
               <th>Usuário</th>
               <th>E-mail</th>
-              <th>Status</th>
+              <th>Presença</th>
               <th>Cadastrado em</th>
             </tr>
           </thead>
@@ -476,6 +476,8 @@
   document.getElementById('user-display').textContent = usuario.nome || 'Supervisor';
   const iniciais = (usuario.nome || 'SV').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
   document.getElementById('avatar-initials').textContent = iniciais;
+  const primeiroNome = (usuario.nome || 'Supervisor').split(' ')[0];
+  document.getElementById('saudacao-titulo').textContent = `Olá, ${primeiroNome}`;
 
   // Carrega lista de promotores
   async function carregarPromotores() {
@@ -484,8 +486,8 @@
       const lista = await resp.json();
 
       document.getElementById('stat-total').textContent = lista.length;
-      document.getElementById('stat-ativos').textContent = lista.filter(p => p.ativo).length;
-      document.getElementById('stat-inativos').textContent = lista.filter(p => !p.ativo).length;
+      document.getElementById('stat-ativos').textContent   = lista.filter(p => p.online).length;
+      document.getElementById('stat-inativos').textContent = lista.filter(p => !p.online).length;
 
       const tbody = document.getElementById('tbody-promotores');
 
@@ -502,7 +504,7 @@
           <td><strong style="color:#e8ecf4">${p.nome}</strong></td>
           <td style="color:#8892aa">${p.username}</td>
           <td style="color:#8892aa">${p.email || '—'}</td>
-          <td><span class="badge ${p.ativo ? 'badge-active' : 'badge-inactive'}">${p.ativo ? 'Ativo' : 'Inativo'}</span></td>
+          <td><span class="badge ${p.online ? 'badge-active' : 'badge-inactive'}">${p.online ? 'Online' : 'Offline'}</span></td>
           <td style="color:#8892aa">${p.criado_em ? new Date(p.criado_em).toLocaleDateString('pt-BR') : '—'}</td>
         </tr>
       `).join('');
@@ -512,6 +514,10 @@
         `<tr><td colspan="5"><div class="empty-state">Erro ao carregar dados. Verifique a conexão com o servidor.</div></td></tr>`;
     }
   }
+
+  // Atualiza a lista periodicamente para refletir mudanças de presença
+  // (um promotor pode ficar offline sem que o supervisor recarregue a página)
+  setInterval(carregarPromotores, 60 * 1000); // a cada 1 min
 
   carregarPromotores();
 

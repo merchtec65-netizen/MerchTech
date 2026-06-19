@@ -131,7 +131,7 @@ public boolean removerMercado(int id) {
     // ─────────────────────────────────────────────
     public JbUsuario autenticar(String username, String senha) {
         String sql =
-            "SELECT id, username, email, senha, nome_completo, ativo, role, criado_em, atualizado_em " +
+            "SELECT id, username, email, senha, nome_completo, ativo, role, criado_em, atualizado_em, ultimo_acesso " +
             "FROM USUARIOS WHERE UPPER(username) = UPPER(?) AND ativo = true";
 
         try (Connection con = conectar();
@@ -152,6 +152,11 @@ public boolean removerMercado(int id) {
                         u.setRole(rs.getString("role"));
                         u.setCriado_em(rs.getDate("criado_em"));
                         u.setAtualizado_em(rs.getDate("atualizado_em"));
+                        u.setUltimoAcesso(rs.getTimestamp("ultimo_acesso"));
+
+                        // Login conta como atividade: já marca presença
+                        registrarHeartbeat(u.getId());
+
                         return u;
                     }
                 }
@@ -164,12 +169,31 @@ public boolean removerMercado(int id) {
     }
 
     // ─────────────────────────────────────────────
+    // HEARTBEAT — marca o usuário como ativo agora
+    // ─────────────────────────────────────────────
+    public boolean registrarHeartbeat(int usuarioId) {
+        String sql = "UPDATE USUARIOS SET ultimo_acesso = CURRENT_TIMESTAMP WHERE id = ?";
+
+        try (Connection con = conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, usuarioId);
+            return pst.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            System.out.println("Erro ao registrar heartbeat:");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // ─────────────────────────────────────────────
     // USUÁRIOS POR ROLE
     // ─────────────────────────────────────────────
     public List<JbUsuario> listarUsuariosPorRole(String role) {
         List<JbUsuario> lista = new ArrayList<>();
         String sql =
-            "SELECT id, username, email, nome_completo, ativo, role, criado_em, atualizado_em " +
+            "SELECT id, username, email, nome_completo, ativo, role, criado_em, atualizado_em, ultimo_acesso " +
             "FROM USUARIOS WHERE role = ? ORDER BY nome_completo";
 
         try (Connection con = conectar();
@@ -187,6 +211,18 @@ public boolean removerMercado(int id) {
                     u.setRole(rs.getString("role"));
                     u.setCriado_em(rs.getDate("criado_em"));
                     u.setAtualizado_em(rs.getDate("atualizado_em"));
+
+                    java.sql.Timestamp ultimoAcesso = rs.getTimestamp("ultimo_acesso");
+                    u.setUltimoAcesso(ultimoAcesso);
+
+                    // Online = teve atividade nos últimos 5 minutos
+                    boolean online = false;
+                    if (ultimoAcesso != null) {
+                        long diffMs = System.currentTimeMillis() - ultimoAcesso.getTime();
+                        online = diffMs <= 5 * 60 * 1000;
+                    }
+                    u.setOnline(online);
+
                     lista.add(u);
                 }
             }
@@ -244,8 +280,8 @@ public boolean removerMercado(int id) {
     // ─────────────────────────────────────────────
     public boolean salvarRegistro(JbRegistro r) {
         String sql =
-            "INSERT INTO REGISTROS (mercado_id, usuario_id, empresa, produto, foto, hora, criado_em) " +
-            "VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE)";
+            "INSERT INTO REGISTROS (mercado_id, usuario_id, empresa, produto, foto, hora, criado_em, visivel) " +
+            "VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, true)";
 
         try (Connection con = conectar();
              PreparedStatement pst = con.prepareStatement(sql)) {
@@ -267,21 +303,38 @@ public boolean removerMercado(int id) {
 
     // ─────────────────────────────────────────────
     // REGISTROS DE VISITA — listar por mercado
+    // (com filtros opcionais de data e empresa/marca)
     // ─────────────────────────────────────────────
-    public List<JbRegistro> listarRegistrosPorMercado(int mercadoId) {
+    public List<JbRegistro> listarRegistrosPorMercado(int mercadoId, String data, String empresa) {
         List<JbRegistro> lista = new ArrayList<>();
-        String sql =
+
+        StringBuilder sql = new StringBuilder(
             "SELECT r.id, r.mercado_id, r.usuario_id, r.empresa, r.produto, r.foto, r.hora, r.criado_em, " +
             "       u.nome_completo AS nome_usuario " +
             "FROM REGISTROS r " +
             "JOIN USUARIOS u ON u.id = r.usuario_id " +
-            "WHERE r.mercado_id = ? " +
-            "ORDER BY r.criado_em DESC, r.hora DESC";
+            "WHERE r.mercado_id = ? AND r.visivel = true "
+        );
+
+        if (data != null && !data.isBlank()) {
+            sql.append("AND CAST(r.criado_em AS DATE) = ? ");
+        }
+        if (empresa != null && !empresa.isBlank()) {
+            sql.append("AND r.empresa = ? ");
+        }
+        sql.append("ORDER BY r.criado_em DESC, r.hora DESC");
 
         try (Connection con = conectar();
-             PreparedStatement pst = con.prepareStatement(sql)) {
+             PreparedStatement pst = con.prepareStatement(sql.toString())) {
 
-            pst.setInt(1, mercadoId);
+            int idx = 1;
+            pst.setInt(idx++, mercadoId);
+            if (data != null && !data.isBlank()) {
+                pst.setDate(idx++, java.sql.Date.valueOf(data)); // espera "yyyy-MM-dd"
+            }
+            if (empresa != null && !empresa.isBlank()) {
+                pst.setString(idx++, empresa);
+            }
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
@@ -304,5 +357,83 @@ public boolean removerMercado(int id) {
             e.printStackTrace();
         }
         return lista;
+    }
+
+    // ─────────────────────────────────────────────
+    // REGISTROS — datas que possuem registros visíveis
+    // (alimenta o calendário no front-end)
+    // ─────────────────────────────────────────────
+    public List<String> listarDatasComRegistro(int mercadoId) {
+        List<String> datas = new ArrayList<>();
+        String sql =
+            "SELECT DISTINCT CAST(r.criado_em AS DATE) AS dia " +
+            "FROM REGISTROS r " +
+            "WHERE r.mercado_id = ? AND r.visivel = true " +
+            "ORDER BY dia DESC";
+
+        try (Connection con = conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, mercadoId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Date d = rs.getDate("dia");
+                    if (d != null) datas.add(d.toString()); // "yyyy-MM-dd"
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar datas com registro:");
+            e.printStackTrace();
+        }
+        return datas;
+    }
+
+    // ─────────────────────────────────────────────
+    // REGISTROS — empresas/marcas distintas de um mercado
+    // (alimenta o filtro de marca no front-end)
+    // ─────────────────────────────────────────────
+    public List<String> listarEmpresasPorMercado(int mercadoId) {
+        List<String> empresas = new ArrayList<>();
+        String sql =
+            "SELECT DISTINCT r.empresa " +
+            "FROM REGISTROS r " +
+            "WHERE r.mercado_id = ? AND r.visivel = true AND r.empresa IS NOT NULL " +
+            "ORDER BY r.empresa";
+
+        try (Connection con = conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, mercadoId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    String emp = rs.getString("empresa");
+                    if (emp != null && !emp.isBlank()) empresas.add(emp);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar empresas:");
+            e.printStackTrace();
+        }
+        return empresas;
+    }
+
+    // ─────────────────────────────────────────────
+    // REGISTROS — ocultar (soft delete)
+    // Apenas marca visivel = false; não apaga linha nem arquivo.
+    // ─────────────────────────────────────────────
+    public boolean ocultarRegistro(int id) {
+        String sql = "UPDATE REGISTROS SET visivel = false WHERE id = ?";
+
+        try (Connection con = conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setInt(1, id);
+            return pst.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            System.out.println("Erro ao ocultar registro:");
+            e.printStackTrace();
+        }
+        return false;
     }
 }

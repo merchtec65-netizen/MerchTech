@@ -91,11 +91,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .empty-state svg{width:36px;height:36px;stroke:var(--muted);fill:none;stroke-width:1.5;margin-bottom:12px;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 12px;}
 
 /* ── MOBILE ── */
-@media(max-width:900px){
-  .sidebar{display:none!important;}
+@media(max-width:768px){
+  .sidebar{display:none;}
   .topbar{display:flex;}
   .bottom-nav{display:block;}
-  .layout{flex-direction:column;height:auto;min-height:100vh;}
+  .layout{flex-direction:column;}
   .main{padding:16px 16px 80px;gap:16px;}
   .page-title{font-size:20px;}
   .welcome-card{padding:18px 18px;gap:12px;}
@@ -249,7 +249,29 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   }
 
   function abrirMercado(id) { window.location.href = `mercado-detalhes.html?id=${id}`; }
-  function sair() { sessionStorage.removeItem('usuario'); window.location.href = '../index.html'; }
+  function sair() {
+    clearInterval(heartbeatInterval);
+    sessionStorage.removeItem('usuario');
+    window.location.href = '../index.html';
+  }
+
+  // ── Heartbeat: sinaliza presença do promotor enquanto o painel está aberto ──
+  async function enviarHeartbeat() {
+    if (!usuario.id) return;
+    try {
+      await fetch(`/MerchTech/heartbeat?usuario_id=${usuario.id}`, { method: 'POST' });
+    } catch (e) {
+      // Falha de rede no heartbeat não deve interromper o uso do app
+    }
+  }
+
+  enviarHeartbeat(); // dispara já ao abrir o painel
+  const heartbeatInterval = setInterval(enviarHeartbeat, 2 * 60 * 1000); // a cada 2 min
+
+  // Reenvia heartbeat quando a aba volta a ficar visível (ex: usuário trocou de app e voltou)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') enviarHeartbeat();
+  });
 
   carregarMercados();
 </script>

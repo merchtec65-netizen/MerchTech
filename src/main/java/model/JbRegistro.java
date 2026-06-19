@@ -22,6 +22,16 @@ public class JbRegistro {
 
     private Date criado_em;
 
+    private boolean visivel = true;
+
+    public boolean isVisivel() {
+        return visivel;
+    }
+
+    public void setVisivel(boolean visivel) {
+        this.visivel = visivel;
+    }
+
     public int getId() {
         return id;
     }

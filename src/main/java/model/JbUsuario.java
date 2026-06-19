@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class JbUsuario {
     private int id;
@@ -12,6 +13,8 @@ public class JbUsuario {
     private String role;       // "promotor" ou "supervisor"
     private Date criado_em;
     private Date atualizado_em;
+    private Timestamp ultimoAcesso;
+    private boolean online; // calculado: true se ultimoAcesso < 5 min atrás
 
     public JbUsuario() { super(); }
 
@@ -54,4 +57,10 @@ public class JbUsuario {
 
     public Date getAtualizado_em()                     { return atualizado_em; }
     public void setAtualizado_em(Date atualizado_em)   { this.atualizado_em = atualizado_em; }
+
+    public Timestamp getUltimoAcesso()                      { return ultimoAcesso; }
+    public void setUltimoAcesso(Timestamp ultimoAcesso)     { this.ultimoAcesso = ultimoAcesso; }
+
+    public boolean isOnline()                { return online; }
+    public void setOnline(boolean online)    { this.online = online; }
 }

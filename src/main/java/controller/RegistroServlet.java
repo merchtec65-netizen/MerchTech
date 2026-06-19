@@ -55,8 +55,28 @@ public class RegistroServlet extends HttpServlet {
 
             int mercadoId = Integer.parseInt(mercadoParam);
 
+            // Rota auxiliar: ?mercado=X&meta=1
+            // Retorna { "datas": [...], "empresas": [...] } para alimentar
+            // o calendário e o filtro de marca no front-end, sem precisar
+            // baixar todos os registros antes.
+            String meta = request.getParameter("meta");
+            if ("1".equals(meta) || "true".equalsIgnoreCase(meta)) {
+                List<String> datas    = dao.listarDatasComRegistro(mercadoId);
+                List<String> empresas = dao.listarEmpresasPorMercado(mercadoId);
+
+                MetaResponse mr = new MetaResponse();
+                mr.datas    = datas;
+                mr.empresas = empresas;
+
+                response.getWriter().write(new Gson().toJson(mr));
+                return;
+            }
+
+            String data    = request.getParameter("data");    // formato yyyy-MM-dd, opcional
+            String empresa = request.getParameter("empresa"); // marca, opcional
+
             List<JbRegistro> lista =
-                dao.listarRegistrosPorMercado(mercadoId);
+                dao.listarRegistrosPorMercado(mercadoId, data, empresa);
 
             String json = new Gson().toJson(lista);
 
@@ -71,6 +91,11 @@ public class RegistroServlet extends HttpServlet {
                 "{\"erro\":\"Erro ao buscar registros\"}"
             );
         }
+    }
+
+    private static class MetaResponse {
+        List<String> datas;
+        List<String> empresas;
     }
 
     @Override
@@ -134,6 +159,52 @@ public class RegistroServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace(); // ESSENCIAL
             response.setStatus(500);
+        }
+    }
+
+    // EXCLUIR (ocultar) REGISTRO — soft delete
+    // DELETE /registros?id=123
+    // Apenas marca visivel = false. Não remove a linha do banco
+    // nem o arquivo de imagem do disco (limpeza fica para depois).
+    @Override
+    protected void doDelete(HttpServletRequest request,
+                            HttpServletResponse response)
+            throws IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+
+            String idParam = request.getParameter("id");
+
+            if (idParam == null || idParam.isEmpty()) {
+                response.setStatus(400);
+                response.getWriter().write(
+                    "{\"erro\":\"ID do registro não informado\"}"
+                );
+                return;
+            }
+
+            int id = Integer.parseInt(idParam);
+
+            boolean ok = dao.ocultarRegistro(id);
+
+            if (ok) {
+                response.getWriter().write("{\"sucesso\":true}");
+            } else {
+                response.setStatus(404);
+                response.getWriter().write(
+                    "{\"erro\":\"Registro não encontrado\"}"
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(500);
+            response.getWriter().write(
+                "{\"erro\":\"Erro ao excluir registro\"}"
+            );
         }
     }
 }
